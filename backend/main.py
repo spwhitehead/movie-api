@@ -43,12 +43,21 @@ async def create_movie(movie: CreateMovieRequest) -> CreateMovieResponse:
 
     movies.append(new_movie)
 
-    return CreateMovieResponse(**new_movie)
+    return CreateMovieResponse(id=str(new_movie.movie_id), name=new_movie.name, year=new_movie.year)
 
 @app.put("/movies/{movie_id}")
 async def update_movie(movie_id: uuid.UUID, updated_movie: UpdateMovieRequest) -> UpdateMovieResponse:
-    raise NotImplementedError
+    for movie in movies:
+        if movie.movie_id == movie_id:
+            movie.name = updated_movie.name
+            movie.year = updated_movie.year
+            return UpdateMovieResponse(success=True)
+    raise HTTPException(status_code=404, detail="Movie ID does not exist")
 
 @app.delete("/movies/{movie_id}")
 async def delete_movie(movie_id: uuid.UUID) -> DeleteMovieResponse:
-    raise NotImplementedError
+    for movie in movies:
+        if movie.movie_id == movie_id:
+            movies.remove(movie)
+            return DeleteMovieResponse(success=True)
+    raise HTTPException(status_code=404, detail="Movie ID does not exist")

@@ -32,11 +32,18 @@ app.add_middleware(
 
 @app.get("/movies")
 async def get_movies() -> list[Movie]:
-    raise NotImplementedError
+    return movies
 
 @app.post("/movies")
-async def create_movie(new_movie: CreateMovieRequest) -> CreateMovieResponse:
-    raise NotImplementedError
+async def create_movie(movie: CreateMovieRequest) -> CreateMovieResponse:
+    movie_id = uuid.uuid4()        
+    new_movie = Movie(movie_id=movie_id, name=movie.name, year= movie.year)
+    if any(movie.name == new_movie.name and movie.year == new_movie.year for movie in movies):
+        raise HTTPException(status_code=400, detail="Movie already exists")
+
+    movies.append(new_movie)
+
+    return CreateMovieResponse(**new_movie)
 
 @app.put("/movies/{movie_id}")
 async def update_movie(movie_id: uuid.UUID, updated_movie: UpdateMovieRequest) -> UpdateMovieResponse:
